@@ -1581,6 +1581,7 @@ SLOW_TO_FAST_CONVERTERS = {
     "BarthezTokenizer": BarthezConverter,
     "BertTokenizer": BertConverter,
     "BigBirdTokenizer": BigBirdConverter,
+    "BitnetTokenizer": LlamaConverter,
     "BlenderbotTokenizer": BlenderbotConverter,
     "CamembertTokenizer": CamembertConverter,
     "CLIPTokenizer": CLIPConverter,
