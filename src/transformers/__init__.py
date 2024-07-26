@@ -212,6 +212,7 @@ _import_structure = {
         "BioGptTokenizer",
     ],
     "models.bit": ["BitConfig"],
+    "models.bitnet": ["BitnetConfig","BitnetTokenizer"],
     "models.blenderbot": [
         "BlenderbotConfig",
         "BlenderbotTokenizer",
@@ -957,6 +958,7 @@ else:
     _import_structure["models.bartpho"].append("BartphoTokenizer")
     _import_structure["models.bert_generation"].append("BertGenerationTokenizer")
     _import_structure["models.big_bird"].append("BigBirdTokenizer")
+    _import_structure["models.bitnet"].append("BitnetTokenizer")
     _import_structure["models.camembert"].append("CamembertTokenizer")
     _import_structure["models.code_llama"].append("CodeLlamaTokenizer")
     _import_structure["models.cpm"].append("CpmTokenizer")
@@ -1525,6 +1527,15 @@ else:
             "BitForImageClassification",
             "BitModel",
             "BitPreTrainedModel",
+        ]
+    )
+    _import_structure["models.bitnet"].extend(
+        [
+            "BitnetForCausalLM",
+            "BitnetForSequenceClassification",
+            "BitnetForQuestionAnswering",
+            "BitnetModel",
+            "BitnetPreTrainedModel",
         ]
     )
     _import_structure["models.blenderbot"].extend(
@@ -4868,6 +4879,7 @@ if TYPE_CHECKING:
         BioGptTokenizer,
     )
     from .models.bit import BitConfig
+    from .models.bitnet import BitnetConfig
     from .models.blenderbot import (
         BlenderbotConfig,
         BlenderbotTokenizer,
@@ -5684,6 +5696,7 @@ if TYPE_CHECKING:
         from .models.bartpho import BartphoTokenizer
         from .models.bert_generation import BertGenerationTokenizer
         from .models.big_bird import BigBirdTokenizer
+        from .models.bitnet import BitnetTokenizer
         from .models.camembert import CamembertTokenizer
         from .models.code_llama import CodeLlamaTokenizer
         from .models.cpm import CpmTokenizer
@@ -6207,6 +6220,13 @@ if TYPE_CHECKING:
             BitForImageClassification,
             BitModel,
             BitPreTrainedModel,
+        )
+        from .models.bitnet import (
+            BitnetForCausalLM,
+            BitnetForQuestionAnswering,
+            BitnetForSequenceClassification,
+            BitnetModel,
+            BitnetPreTrainedModel
         )
         from .models.blenderbot import (
             BlenderbotForCausalLM,
