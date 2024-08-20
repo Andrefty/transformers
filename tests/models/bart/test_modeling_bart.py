@@ -1540,8 +1540,3 @@ class BartStandaloneDecoderModelTest(ModelTesterMixin, GenerationTesterMixin, un
     @unittest.skip
     def test_save_load_fast_init_from_base(self):
         pass
-
-    @unittest.skip(reason="Generate needs input ids")
-    def test_inputs_embeds_matches_input_ids_with_generate(self):
-        # generate only works with input ids for bartforcausalLM
-        pass

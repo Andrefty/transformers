@@ -104,6 +104,7 @@ def _prepare_4d_causal_attention_mask_with_cache_position(
             causal_mask[:, :, :, :mask_length] = causal_mask[:, :, :, :mask_length].masked_fill(
                 padding_mask, min_dtype
             )
+
     return causal_mask
 
 
@@ -300,6 +301,7 @@ class Gemma2Attention(nn.Module):
             attn_weights = attn_weights / self.config.attn_logit_softcapping
             attn_weights = torch.tanh(attn_weights)
             attn_weights = attn_weights * self.config.attn_logit_softcapping
+
         if attention_mask is not None:  # no matter the length, we just slice it
             causal_mask = attention_mask[:, :, :, : key_states.shape[-2]]
             attn_weights = attn_weights + causal_mask
@@ -500,9 +502,11 @@ class Gemma2SdpaAttention(Gemma2Attention):
 
         key_states = repeat_kv(key_states, self.num_key_value_groups)
         value_states = repeat_kv(value_states, self.num_key_value_groups)
+
         causal_mask = attention_mask
         if attention_mask is not None:
             causal_mask = causal_mask[:, :, :, : key_states.shape[-2]]
+
         # SDPA with memory-efficient backend is currently (torch==2.1.2) bugged with non-contiguous inputs with custom attn_mask,
         # Reference: https://github.com/pytorch/pytorch/issues/112577.
         if query_states.device.type == "cuda" and causal_mask is not None:
@@ -513,6 +517,7 @@ class Gemma2SdpaAttention(Gemma2Attention):
         # We dispatch to SDPA's Flash Attention or Efficient kernels via this `is_causal` if statement instead of an inline conditional assignment
         # in SDPA to support both torch.compile's dynamic shapes and full graph options. An inline conditional prevents dynamic shapes from compiling.
         is_causal = True if causal_mask is None and q_len > 1 else False
+
         attn_output = torch.nn.functional.scaled_dot_product_attention(
             query_states,
             key_states,
@@ -578,6 +583,7 @@ class Gemma2DecoderLayer(nn.Module):
                 attention_mask = torch.where(sliding_window_mask, min_dtype, attention_mask)
                 if attention_mask.shape[-1] <= 1:  # when decoding
                     attention_mask = attention_mask[:, :, :, -self.sliding_window :]
+
         residual = hidden_states
 
         hidden_states = self.input_layernorm(hidden_states)
@@ -990,6 +996,7 @@ class Gemma2ForCausalLM(Gemma2PreTrainedModel):
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
         outputs = self.model(
             input_ids=input_ids,
@@ -1056,6 +1063,7 @@ class Gemma2ForCausalLM(Gemma2PreTrainedModel):
                 input_ids = input_ids[:, -cache_position.shape[0] :]
             elif input_ids.shape[1] != cache_position.shape[0]:  # Default case (the "else", a no op, is Exception 2)
                 input_ids = input_ids[:, cache_position]
+
         if attention_mask is not None and position_ids is None:
             # create position_ids on the fly for batch generation
             position_ids = attention_mask.long().cumsum(-1) - 1
@@ -1071,10 +1079,10 @@ class Gemma2ForCausalLM(Gemma2PreTrainedModel):
 
         # if `inputs_embeds` are passed, we only want to use them in the 1st generation step
         if inputs_embeds is not None and cache_position[0] == 0:
-            model_inputs = {"inputs_embeds": inputs_embeds, "input_ids": None}
+            model_inputs = {"inputs_embeds": inputs_embeds}
         else:
             # The clone here is for the same reason as for `position_ids`.
-            model_inputs = {"input_ids": input_ids.clone(memory_format=torch.contiguous_format), "inputs_embeds": None}
+            model_inputs = {"input_ids": input_ids.clone(memory_format=torch.contiguous_format)}
 
         if (
             isinstance(past_key_values, HybridCache)
@@ -1085,10 +1093,12 @@ class Gemma2ForCausalLM(Gemma2PreTrainedModel):
                 batch_size, sequence_length, _ = model_inputs["inputs_embeds"].shape
                 device = model_inputs["inputs_embeds"].device
             else:
-                batch_size, sequence_length = model_inputs["input_ids"].shape
-                device = model_inputs["input_ids"].device
+                batch_size, sequence_length = input_ids.shape
+                device = input_ids.device
+
             dtype = self.lm_head.weight.dtype
             min_dtype = torch.finfo(dtype).min
+
             attention_mask = _prepare_4d_causal_attention_mask_with_cache_position(
                 attention_mask,
                 sequence_length=sequence_length,
@@ -1099,6 +1109,7 @@ class Gemma2ForCausalLM(Gemma2PreTrainedModel):
                 cache_position=cache_position,
                 batch_size=batch_size,
             )
+
         model_inputs.update(
             {
                 "position_ids": position_ids,
