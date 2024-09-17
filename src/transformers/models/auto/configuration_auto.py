@@ -46,7 +46,6 @@ CONFIG_MAPPING_NAMES = OrderedDict(
         ("bigbird_pegasus", "BigBirdPegasusConfig"),
         ("biogpt", "BioGptConfig"),
         ("bit", "BitConfig"),
-        ("bitnet", "BitnetConfig"),
         ("blenderbot", "BlenderbotConfig"),
         ("blenderbot-small", "BlenderbotSmallConfig"),
         ("blip", "BlipConfig"),
