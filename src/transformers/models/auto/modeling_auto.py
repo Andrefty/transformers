@@ -46,6 +46,7 @@ MODEL_MAPPING_NAMES = OrderedDict(
         ("bigbird_pegasus", "BigBirdPegasusModel"),
         ("biogpt", "BioGptModel"),
         ("bit", "BitModel"),
+        ("bitnet", "BitnetModel"),
         ("blenderbot", "BlenderbotModel"),
         ("blenderbot-small", "BlenderbotSmallModel"),
         ("blip", "BlipModel"),
