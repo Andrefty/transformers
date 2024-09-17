@@ -50,6 +50,7 @@ CONFIG_MAPPING_NAMES = OrderedDict(
         ("blenderbot-small", "BlenderbotSmallConfig"),
         ("blip", "BlipConfig"),
         ("blip-2", "Blip2Config"),
+        ("bitnet", "BitnetConfig"),
         ("bloom", "BloomConfig"),
         ("bridgetower", "BridgeTowerConfig"),
         ("bros", "BrosConfig"),
